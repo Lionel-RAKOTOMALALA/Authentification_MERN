@@ -1,10 +1,10 @@
 import React from 'react';
-import avatar from '../assets/profile.jpeg';
+import avatar from '../assets/User-profile.png';
 import styles from '../styles/Username.module.css';
 import toast, { ToastBar, Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik';
 import { usernameValidate } from '../helper/Validate';
-
+import { Link } from 'react-router-dom';
 export default function Username() {
 
 const formik = useFormik({
@@ -53,7 +53,7 @@ const formik = useFormik({
                 <button className={styles.btn} type="submit">Allons-y</button>
               </div>
               <div className="text-center py-4">
-                <span className='text-gray-500'>Pas encore membre ? <a className='text-red-500' href="/register">Inscrivez-vous maintenant</a></span>
+                <span className='text-gray-500'>Pas encore membre ? <Link className='text-red-500' to="/register">Inscrivez-vous maintenant</Link></span>
               </div>
             </div>
           </form>

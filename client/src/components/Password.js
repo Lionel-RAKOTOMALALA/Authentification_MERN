@@ -1,9 +1,10 @@
 import React from 'react';
-import avatar from '../assets/profile.jpeg';
+import avatar from '../assets/User-profile.png';
 import styles from '../styles/Username.module.css';
 import toast, { ToastBar, Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik';
 import { passwordValidate } from '../helper/Validate';
+import { Link } from 'react-router-dom';
 
 export default function Password() {
 
@@ -53,7 +54,7 @@ const formik = useFormik({
                 <button className={styles.btn} type="submit">Se connecter</button>
               </div>
               <div className="text-center py-4">
-                <span className='text-gray-500'>Mot de passe oublié ? <a className='text-red-500' href="/recovery">Rénitialisez</a></span>
+                <span className='text-gray-500'>Mot de passe oublié ? <Link className='text-red-500' to="/recovery">Rénitialisez</Link></span>
               </div>
             </div>
           </form>
