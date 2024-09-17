@@ -2,7 +2,7 @@ import UserModel from "../model/User.model.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'; // Importation correcte pour les modules CommonJS
 import ENV from '../config.js';
-
+import otpGenerator from 'otp-generator';
 
 
 /** middleware for verify user */
@@ -122,13 +122,14 @@ export async function getUser(req, res) {
 
 export async function updateUser(req, res) {
     try {
-        const id = req.query.id;
+        // const id = req.query.id;
+        const { userId } = req.user;
 
-        if (id) {
+        if (userId) {
             const body = req.body;
 
             // Utilisation d'async/await pour updateOne sans callback
-            const result = await UserModel.updateOne({ _id: id }, body);
+            const result = await UserModel.updateOne({ _id: userId }, body);
 
             if (result.matchedCount === 0) {
                 return res.status(404).send({ error: "User Not Found...!" });
@@ -145,17 +146,57 @@ export async function updateUser(req, res) {
 
 
 export async function generateOPT(req, res) {
-    res.json('generateOPT route');
+    req.app.locals.OTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false })
+    res.status(201).send({ code: req.app.locals.OTP })
 }
 
 export async function verifyOPT(req, res) {
-    res.json('verifyOPT route');
+    const { code } = req.query;
+    if (parseInt(req.app.locals.OTP) === parseInt(code)) {
+        req.app.locals.OTP = null; //reset the OTP value
+        req.app.locals.resetSession = true; // start the session for reset password
+        return res.status(201).send({ msg: 'Verify successfully!!' })
+    }
+    return res.status(400).send({ error: "Invalid OTP" });
 }
 
 export async function createResetSession(req, res) {
-    res.json('createResetSession route');
+    if (req.app.locals.resetSession) {
+        req.app.locals.resetSession = false; // allow access to this route only once
+        return res.status(201).send({ msg: 'access granted!' });
+    }
+    return res.status(440).send({ error: "Session expired!" });
 }
 
 export async function resetPassword(req, res) {
-    res.json('resetPassword route');
+
+    try {
+        if(!req.app.locals.resetSession) return res.status(440).send({error : "Session expired!"});
+        const { username, password } = req.body;
+        try {
+            UserModel.findOne({ username })
+            .then(user => {
+                bcrypt.hash(password,10)
+                    .then(hashedPassword =>{
+                        UserModel.updateOne({username : user.username}, {password: hashedPassword}, function(err, data){
+                            if(err) return res.status(500).send({error : err.message})
+                            else return res.status(200).send({ msg: "Password reset successfully!" })
+                        })
+                    })
+                    .catch(e => {
+                        return res.status(404).send({
+                            error: error.message || "An error occurred while hashing the password"
+                        })
+                    })
+            })
+            .catch(error =>{
+                return res.status(404).send({error : "Username Not Found"})
+            })
+        } catch (error) {
+            return res.status(400).send({ error });
+        }
+
+    } catch (error) {
+        return res.status(500).send({ error: error.message || "An error occurred while resetting password" });
+    }
 }
