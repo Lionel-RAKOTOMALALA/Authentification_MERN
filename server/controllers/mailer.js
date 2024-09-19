@@ -1,13 +1,13 @@
 import nodemailer from 'nodemailer';
 import Mailgen from 'mailgen';
-import ENV from '../config.js'; // Assurez-vous que vos variables ENV contiennent les bons détails (EMAIL et PASSWORD)
+import ENV from '../config.js'; 
 
 // Configuration pour Gmail
 let nodeConfig = {
     service: 'gmail',
     auth: {
-        user: ENV.EMAIL, // Ton adresse email Gmail
-        pass: ENV.PASSWORD, // Ton mot de passe Gmail ou mot de passe d'application
+        user: ENV.EMAIL, 
+        pass: ENV.PASSWORD, 
     }
 }
 
@@ -28,7 +28,7 @@ export const registerMail = async (req, otp = null) => {
     const { username, text, subject } = req.body;
 
     try {
-        // Utiliser l'email de l'utilisateur connecté (déjà décodé par le middleware Auth)
+        
         const userEmail = req.user.email; // Assurez-vous que l'email est bien inclus dans le token JWT
 
         // Corps de l'email

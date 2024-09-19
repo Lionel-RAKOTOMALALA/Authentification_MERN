@@ -10,7 +10,7 @@ import Auth, { localVariables } from '../middleware/auth.js'
 /** POST METHODE */
 router.route('/register').post(controller.register); //register user
 router.route('/registerMail').post(Auth, controller.generateOPT); // send the mail
-router.route('/authenticate').post((req, res) => res.end()); // authenticate user
+router.route('/authenticate').post(controller.verifyUser, (req, res) => res.end()); // authenticate user
 router.route('/login').post(controller.verifyUser, controller.login); // login in app
 
 /** GET METHODE */
