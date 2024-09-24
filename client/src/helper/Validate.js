@@ -1,8 +1,17 @@
 import toast from "react-hot-toast"
-
+import {authenticate} from "./helper"
 /** validate login page */
 export async function usernameValidate(values){
     const errors = usernameVerify({}, values);
+
+    if(values.username){
+        // check user exist or not
+        const { status } =  await authenticate(values.username);
+        
+        if(status !== 200){
+            errors.exist = toast.error('User does not exist...!')
+        }
+    }
 
     return errors;
 } 
@@ -17,8 +26,6 @@ function passwordVerify(errors = {}, values){
     const specialChars = /[!@#$%^&*(),.?":{}|<>]/;
     if(!values.password){
         errors.password = toast.error("Password required...!");
-    }else if(values.password.includes(" ")){
-        errors.password = toast.error('Password should not contain spaces...!');
     }else if(values.password.length < 4){
         errors.password = toast.error('Password should be at least 4 characters long...!');
     }else if(!specialChars.test(values.password)){
@@ -47,8 +54,6 @@ export async function profileValidation(values){
 function usernameVerify(error = {}, values){
     if(!values.username){
         error.username = toast.error('Username Required...!');
-    }else if(values.username.includes(" ")){
-        error.username = toast.error('Username should not contain spaces...!');
     }
     return error;
 }
