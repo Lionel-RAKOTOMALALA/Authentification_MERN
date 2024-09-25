@@ -1,18 +1,12 @@
 import React, { useState } from 'react';
-// Importation de l'image avatar par défaut
 import avatar from '../assets/User-profile.png';
-// Importation des styles CSS spécifiques au module Username
 import styles from '../styles/Username.module.css';
-// Importation de la bibliothèque react-hot-toast pour les notifications toast
 import toast, { ToastBar, Toaster } from 'react-hot-toast'
-// Importation du hook useFormik de Formik pour la gestion des formulaires
 import { useFormik } from 'formik';
-// Importation de la fonction de validation pour les mots de passe
 import { registerValidation } from '../helper/Validate';
-// Importation de Link depuis react-router-dom pour la navigation
 import { Link } from 'react-router-dom';
-// Importation de la fonction de conversion en Base64 pour les fichiers uploadés
 import convertToBase64 from '../helper/convert';
+import { registerUser } from '../helper/helper';
 
 // Déclaration du composant fonctionnel Register (formulaire d'inscription)
 export default function Register() {
@@ -36,10 +30,15 @@ export default function Register() {
     validateOnChange: false,
 
     // Fonction qui s'exécute lors de la soumission du formulaire
-    onSubmit: async(values) => {
+    onSubmit: async (values) => {
       // Assignation du fichier (avatar) au profil, ou d'une chaîne vide si aucun fichier n'est sélectionné
-      values = await Object.assign(values, {profile: file || ''})
-      console.log(values); // Affichage du mot de passe dans la console (à des fins de debug)
+      values = await Object.assign(values, { profile: file || '' })
+      let registerPromise = registerUser(values);
+      toast.promise(registerPromise, {
+        loading: 'Creating...',
+        success: <b>Register Successfully...!</b>,
+        error : <b>Could not Register.</b>
+      })
     },
   })
 
@@ -54,13 +53,13 @@ export default function Register() {
   // Rendu du composant Register
   return (
     <div className="container mx-auto">
-      
+
       {/* Toaster pour afficher les notifications */}
       <Toaster position='top-center' reverseOrder={false}></Toaster>
 
       <div className="flex justify-center items-center h-screen">
-        <div className={styles.glass} style={{ width:"45%" }}>
-          
+        <div className={styles.glass} style={{ width: "45%" }}>
+
           {/* Titre de la page d'inscription */}
           <div className="title flex flex-col items-center">
             <h4 className='text-5xl font-bold'>Inscription</h4>
@@ -80,7 +79,7 @@ export default function Register() {
                   <img src={file || avatar} className={styles.profile_img} alt="avatar" />
                 </label>
                 {/* Input pour uploader un fichier (image de profil) */}
-                <input onChange={onUpload} type="file" id="profile"/>
+                <input onChange={onUpload} type="file" id="profile" />
               </div>
 
               {/* Champs de texte pour l'email, le nom d'utilisateur et le mot de passe */}
