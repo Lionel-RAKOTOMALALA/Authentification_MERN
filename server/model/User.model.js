@@ -32,7 +32,10 @@ export const UserSchema = new Schema({
     },
     profile: {
         type: String,
-    }
+    },
+    address: {
+        type: String,
+    },
 });
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);

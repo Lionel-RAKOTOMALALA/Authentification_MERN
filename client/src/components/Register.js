@@ -4,13 +4,14 @@ import styles from '../styles/Username.module.css';
 import toast, { ToastBar, Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik';
 import { registerValidation } from '../helper/Validate';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import convertToBase64 from '../helper/convert';
 import { registerUser } from '../helper/helper';
 
 // Déclaration du composant fonctionnel Register (formulaire d'inscription)
 export default function Register() {
 
+  const navigate = useNavigate();
   // useState pour gérer l'état du fichier (avatar)
   const [file, setFile] = useState();
 
@@ -37,8 +38,9 @@ export default function Register() {
       toast.promise(registerPromise, {
         loading: 'Creating...',
         success: <b>Register Successfully...!</b>,
-        error : <b>Could not Register.</b>
-      })
+        error: <b>Could not Register.</b>
+      });
+      registerPromise.then(function(){navigate('/')});
     },
   })
 

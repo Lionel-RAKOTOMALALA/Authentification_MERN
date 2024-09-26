@@ -7,23 +7,29 @@ import { useFormik } from 'formik';
 import { profileValidation } from '../helper/Validate';
 import { Link } from 'react-router-dom';
 import convertToBase64 from '../helper/convert';
+import useFetch from '../hooks/fetch.hook';
+import { useAuthStore } from '../store/store';
+import { updateUser } from '../helper/helper';
 
 // Déclaration du composant fonctionnel Register (formulaire d'inscription)
 export default function Profile() {
 
   // useState pour gérer l'état du fichier (avatar)
   const [file, setFile] = useState();
+  const { username } = useAuthStore(state => state.auth)
+  const [{ isLoading, apiData, serverError }] = useFetch(`/user/${username}`)
 
   // Initialisation de Formik pour gérer le formulaire
   const formik = useFormik({
     // Valeurs initiales des champs du formulaire
     initialValues: {
-      prenom: '',
-      nom: '',
-      email: '',
-      mobile: '',
-      address: '',
+      prenom: apiData?.prenom || '',
+      nom: apiData?.nom || '',
+      email: apiData?.email || '',
+      mobile: apiData?.mobile || '',
+      address: apiData?.address || '',
     },
+    enableReinitialize : true,
     // Utilisation de la fonction de validation pour les mots de passe
     validate: profileValidation,
     // Désactivation de la validation à la perte de focus
@@ -35,6 +41,13 @@ export default function Profile() {
     onSubmit: async(values) => {
       // Assignation du fichier (avatar) au profil, ou d'une chaîne vide si aucun fichier n'est sélectionné
       values = await Object.assign(values, {profile: file || ''})
+      let updatePromise = updateUser(values);
+
+      toast.promise(updatePromise, {
+        loading : 'Updating...',
+        success : <b>Update Successfully...!</b>,
+        error : <b>Could not update </b>
+      })
       console.log(values); // Affichage du mot de passe dans la console (à des fins de debug)
     },
   })
@@ -47,7 +60,9 @@ export default function Profile() {
     setFile(base64);
   }
 
-  // Rendu du composant Register
+  if (isLoading) return <h1 className="text-2xl font-bold">isLoading</h1>;
+  if (serverError) return <h1 className="text-xl text-re-500">{serverError.message}</h1>;
+  // Rendu du composant Profile
   return (
     <div className="container mx-auto">
       
@@ -73,7 +88,7 @@ export default function Profile() {
               <div className="profile flex justify-center py-4">
                 <label htmlFor="profile">
                   {/* Affichage de l'avatar sélectionné ou de l'avatar par défaut */}
-                  <img src={file || avatar} className={extend.profile_img} alt="avatar" />
+                  <img src={apiData?.profile || file || avatar} className={extend.profile_img} alt="avatar" />
                 </label>
                 {/* Input pour uploader un fichier (image de profil) */}
                 <input onChange={onUpload} type="file" id="profile"/>
