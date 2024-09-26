@@ -3,10 +3,13 @@ import morgan from 'morgan';
 import connect from './database/conn.js';
 import router from './router/route.js';
 import cors from 'cors';
+
 const app = express();
 
 /** middleware */
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));  // Utiliser express.json() avec une limite
+app.use(express.urlencoded({ limit: '10mb', extended: true }));  // Utiliser express.urlencoded() pour les données d'URL encodées
+
 /** CORS Configuration */
 app.use(cors());
 app.use(morgan('tiny'));

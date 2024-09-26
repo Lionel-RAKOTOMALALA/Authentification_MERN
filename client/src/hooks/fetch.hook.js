@@ -1,51 +1,37 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getUsername } from '../helper/helper'
 
 axios.defaults.baseURL = process.env.REACT_APP_SERVER_DOMAIN;
 
+
 /** custom hook */
-export default function useFetch(query) {
-  const [getData, setData] = useState({
-    isLoading: false,
-    apiData: undefined,
-    status: null,
-    serverError: null,
-  });
+export default function useFetch(query){
+    const [getData, setData] = useState({ isLoading : false, apiData: undefined, status: null, serverError: null })
 
-  useEffect(() => {
-    if (!query) return;
+    useEffect(() => {
 
-    const fetchData = async () => {
-      try {
-        // Début du chargement
-        setData((prev) => ({ ...prev, isLoading: true }));
+        const fetchData = async () => {
+            try {
+                setData(prev => ({ ...prev, isLoading: true}));
 
-        const { data, status } = await axios.get(`/api/${query}`);
+                const { username } = !query ? await getUsername() : '';
+                
+                const { data, status } = !query ? await axios.get(`/api/user/${username}`) : await axios.get(`/api/${query}`);
 
-        if (status === 200 || status === 201) {
-          // Mise à jour des données et arrêt du chargement
-          setData((prev) => ({
-            ...prev,
-            apiData: data,
-            status: status,
-            isLoading: false,
-          }));
-        } else {
-          // Si le statut n'est pas OK, arrêtez le chargement
-          setData((prev) => ({ ...prev, isLoading: false }));
-        }
-      } catch (error) {
-        // Gestion des erreurs
-        setData((prev) => ({
-          ...prev,
-          isLoading: false,
-          serverError: error,
-        }));
-      }
-    };
+                if(status === 201){
+                    setData(prev => ({ ...prev, isLoading: false}));
+                    setData(prev => ({ ...prev, apiData : data, status: status }));
+                }
 
-    fetchData();
-  }, [query]);
+                setData(prev => ({ ...prev, isLoading: false}));
+            } catch (error) {
+                setData(prev => ({ ...prev, isLoading: false, serverError: error }))
+            }
+        };
+        fetchData()
 
-  return [getData, setData];
+    }, [query]);
+
+    return [getData, setData];
 }
