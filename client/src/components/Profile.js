@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import avatar from '../assets/User-profile.png';
 import styles from '../styles/Username.module.css';
 import extend from '../styles/Profile.module.css';
-import toast, { Toaster } from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast';
 import { useFormik } from 'formik';
 import { profileValidation } from '../helper/Validate';
 import { Link } from 'react-router-dom';
@@ -13,10 +13,13 @@ import { updateUser } from '../helper/helper';
 
 // Déclaration du composant fonctionnel Profile
 export default function Profile() {
-  
-
   const [file, setFile] = useState();
   const [{ isLoading, apiData, serverError }] = useFetch();
+
+  // Log the API data for debugging
+  useEffect(() => {
+    console.log("API Data:", apiData);
+  }, [apiData]);
 
   // Initialisation de Formik pour gérer le formulaire
   const formik = useFormik({
@@ -46,12 +49,12 @@ export default function Profile() {
   });
 
   // Gestion de l'upload de fichier
-  const onUpload = async e => {
+  const onUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return; // Assure-toi qu'un fichier est sélectionné
     const base64 = await convertToBase64(file);
     setFile(base64);  // Stocke l'image convertie en base64 dans l'état local
-  }
+  };
 
   // Vérification : Si une nouvelle image est uploadée, elle doit être prioritaire à l'affichage
   const profileImage = file || apiData?.profile || avatar;
@@ -61,12 +64,9 @@ export default function Profile() {
 
   return (
     <div className="container mx-auto">
-
       <Toaster position='top-center' reverseOrder={false}></Toaster>
-
       <div className="flex justify-center items-center h-screen">
-        <div className={`${styles.glass}`} style={{ width:"45%" }}>
-          
+        <div className={`${styles.glass}`} style={{ width: "45%" }}>
           <div className="title flex flex-col items-center">
             <h4 className='text-5xl font-bold'>Profile</h4>
             <span className='py-1 text-xl w-2/3 text-center text-gray-500'>
@@ -76,7 +76,6 @@ export default function Profile() {
 
           <form className='py-1' onSubmit={formik.handleSubmit}>
             <div className="flex flex-col mb-6">
-
               <div className="profile flex justify-center py-4">
                 <label htmlFor="profile">
                   {/* Affichage de l'avatar sélectionné ou de l'avatar par défaut */}
@@ -108,9 +107,9 @@ export default function Profile() {
                   <input
                     type="text"
                     id="mobile"
-                    placeholder='contact'
+                    placeholder='Contact'
                     className={`${styles.textbox} ${extend.textbox}`}
-                    name="contact"
+                    name="mobile"  // Changed from 'contact' to 'mobile'
                     {...formik.getFieldProps('mobile')}
                   />
                   <input
@@ -143,5 +142,5 @@ export default function Profile() {
         </div>
       </div>
     </div>
-  )
+  );
 }

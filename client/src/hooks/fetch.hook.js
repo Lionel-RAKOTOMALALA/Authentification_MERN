@@ -1,37 +1,52 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { getUsername } from '../helper/helper'
+import { useState, useEffect } from "react";
+import { getUsername } from "../helper/helper";
 
 axios.defaults.baseURL = process.env.REACT_APP_SERVER_DOMAIN;
 
-
 /** custom hook */
-export default function useFetch(query){
-    const [getData, setData] = useState({ isLoading : false, apiData: undefined, status: null, serverError: null })
 
-    useEffect(() => {
+export default function useFetch(query) {
+  const [getData, setData] = useState({
+    isLoading: false,
+    apiData: undefined,
+    status: null,
+    serverError: null,
+  });
 
-        const fetchData = async () => {
-            try {
-                setData(prev => ({ ...prev, isLoading: true}));
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setData((prev) => ({ ...prev, isLoading: true }));
 
-                const { username } = !query ? await getUsername() : '';
-                
-                const { data, status } = !query ? await axios.get(`/api/user/${username}`) : await axios.get(`/api/${query}`);
+        const { username } = !query ? await getUsername() : '';
 
-                if(status === 201){
-                    setData(prev => ({ ...prev, isLoading: false}));
-                    setData(prev => ({ ...prev, apiData : data, status: status }));
-                }
+        console.log(username);
+        
+        const { data, status } = !query ? await axios.get(`/api/user/${username}`) : await axios.get(`/api/${query}`);
 
-                setData(prev => ({ ...prev, isLoading: false}));
-            } catch (error) {
-                setData(prev => ({ ...prev, isLoading: false, serverError: error }))
-            }
-        };
-        fetchData()
+        if (status === 200 || status === 201) {
+          setData((prev) => ({
+            ...prev,
+            apiData: data,
+            status: status,
+            isLoading: false,
+          }));
+        } else {
+          setData((prev) => ({ ...prev, isLoading: false }));
+        }
+      } catch (error) {
+        console.log(error);
+        setData((prev) => ({
+          ...prev,
+          isLoading: false,
+          serverError: error,
+        }));
+      }
+    };
 
-    }, [query]);
+    fetchData();
+  }, [query]);
 
-    return [getData, setData];
+  return [getData, setData];
 }

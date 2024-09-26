@@ -13,8 +13,8 @@ import { verifyPassword } from '../helper/helper';
 export default function Password() {
 
   const navigate = useNavigate();
-  const { username } = useAuthStore(state => state.auth)
-  const [{ isLoading, apiData, serverError }] = useFetch()
+    const { username } = useAuthStore(state => state.auth)
+    const [{ isLoading, apiData, serverError }] = useFetch()
   
   const formik = useFormik({
     initialValues: {
