@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // Importer useEffect
 import avatar from '../assets/User-profile.png';
 import styles from '../styles/Username.module.css';
 import toast, { Toaster } from 'react-hot-toast';
@@ -6,13 +6,18 @@ import { useFormik } from 'formik';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/store';
 import { verifyPassword } from '../helper/helper';
-import { usernameValidate, passwordValidate } from '../helper/Validate';  // Import validation functions
+import { usernameValidate, passwordValidate } from '../helper/Validate'; // Import validation functions
 
 export default function AuthForm() {
-  
   const navigate = useNavigate();
   const setUsername = useAuthStore(state => state.setUsername);
-console.log(username);
+  const username = useAuthStore(state => state.username); // Récupérer le nom d'utilisateur du store
+
+  // Utilisation de useEffect pour surveiller username
+  useEffect(() => {
+    console.log(username);
+  }, [username]); // Ajoute username comme dépendance
+
   const formik = useFormik({
     initialValues: {
       username: '',
@@ -35,31 +40,31 @@ console.log(username);
 
     onSubmit: async (values) => {
       setUsername(values.username);
-      
-      // Appel à la fonction verifyPassword et gestion des promesses
+
       try {
-        const loginResponse = await verifyPassword({ username: values.username, password: values.password });
-        
+        const loginResponse = await verifyPassword(
+          { username: values.username, password: values.password },
+          setUsername // Passe le setter ici
+        );
+
+        console.log('LoginResponse:', loginResponse); // Log pour inspecter la réponse
+
         if (loginResponse.error) {
-          if (loginResponse.username) {
-            // Username trouvé mais mot de passe incorrect
-            setUsername(loginResponse.username);
-            toast.error("Mot de passe incorrect pour l'utilisateur " + loginResponse.username);
-          } else {
-            toast.error(loginResponse.error);
-          }
+          console.log("yesError");
+          console.log("yesUsername");
+
+          console.log("Username trouvé: ", loginResponse.username);
+          toast.error("Mot de passe incorrect pour l'utilisateur " + loginResponse.username);
         } else {
           // Connexion réussie
           let { token } = loginResponse;
           localStorage.setItem('token', token);
           navigate('/profile');
         }
-        
       } catch (error) {
-        // Afficher le message d'erreur
         toast.error(error.message || "Erreur inconnue");
       }
-    },
+    }
   });
 
   return (
@@ -74,6 +79,13 @@ console.log(username);
               Connectez-vous pour explorer plus.
             </span>
           </div>
+
+          {/* Afficher le nom d'utilisateur s'il est défini */}
+          {username && (
+            <div className="py-4 text-xl text-center text-blue-500">
+              Vous êtes connecté en tant que <strong>{username}</strong>
+            </div>
+          )}
 
           <form className='py-1' onSubmit={formik.handleSubmit}>
             <div className="flex flex-col mb-6">
@@ -111,7 +123,7 @@ console.log(username);
                 <span className='text-gray-500'>
                   Mot de passe oublié ? <Link className='text-red-500' to="/recovery">Rénitialisez</Link>
                 </span>
-                <br/>
+                <br />
                 <span className='text-gray-500'>
                   Pas encore membre ? <Link className='text-red-500' to="/register">Inscrivez-vous maintenant</Link>
                 </span>

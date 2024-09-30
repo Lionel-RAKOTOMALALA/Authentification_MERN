@@ -1,34 +1,29 @@
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';
-
-
+import { jwtDecode } from 'jwt-decode';
+import { useAuthStore } from '../store/store'; // Assurez-vous d'importer votre store Zustand ici
 
 axios.defaults.baseURL = process.env.REACT_APP_SERVER_DOMAIN;
 
 /** Make API request */
 
-
 /** to get username from token */
-export async function getUsername(){
-    const token = localStorage.getItem('token')
-    if(!token) return Promise.reject("Cannot find Token");
-    let decode = jwtDecode(token)
+export async function getUsername() {
+    const token = localStorage.getItem('token');
+    if (!token) return Promise.reject("Cannot find Token");
+    let decode = jwtDecode(token);
     console.log(decode);
-    
+
     return decode;
 }
 
-
 /** authenticate function */
-
 export async function authenticate(username) {
     try {
-        return await axios.post('/api/authenticate', { username })
+        return await axios.post('/api/authenticate', { username });
     } catch (error) {
-        return { error: "Username doesn't exist...!" }
+        return { error: "Username doesn't exist...!" };
     }
 }
-
 
 /** get User details */
 export async function getUser({ username }) {
@@ -40,41 +35,41 @@ export async function getUser({ username }) {
     }
 }
 
-
 /** register user function */
-
 export async function registerUser(credentials) {
     try {
         const { data: { msg }, status } = await axios.post('http://localhost:8000/api/register', credentials);
 
-        // let { username, email } = credentials;
-
-        /** send email */
-        // if (status === 201) {
-        //     await axios.post('/api/registerMail', { username, userEmail: email, text: msg })
-        // }
         return Promise.resolve(msg);
     } catch (error) {
-        return Promise.reject({ error })
+        return Promise.reject({ error });
     }
 }
-
 
 /** Login function */
-
-export async function verifyPassword({ username, password }) {
+export async function verifyPassword(credentials, setUsername) {
     try {
-        if (username) {
-            const { data } = await axios.post('/api/login', { username, password });
-            return data;  // Retourner directement les données en cas de succès
-        }
-        throw new Error("Le nom d'utilisateur est requis.");  // Gérer le cas où le nom d'utilisateur n'est pas fourni
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(credentials),
+        });
+
+        const data = await response.json();
+        
+        console.log('Réponse du serveur:', data); // Log pour voir la réponse complète
+         
+
+
+
+        return data;
     } catch (error) {
-        // Rejeter la promesse avec un message convivial ou l'erreur d'origine
-        return Promise.reject(error.response?.data?.message || "Le mot de passe ne correspond pas...!"); 
+        console.log('Erreur lors de la connexion:', error.message); // Log de l'erreur
+        return { error: error.message };
     }
 }
-
 
 /** update user function */
 export async function updateUser(response) {
@@ -88,7 +83,7 @@ export async function updateUser(response) {
     }
 }
 
-/** generate OTP à rectifier vu que c'est direct avec l'envoie mail dans le controller generateOTP*/
+/** generate OTP */
 export async function generateOTP(username) {
     try {
         const { data: { code }, status } = await axios.get('/api/generateOTP', { params: { username } });
@@ -97,25 +92,23 @@ export async function generateOTP(username) {
         if (status === 201) {
             let { data: { email } } = await getUser({ username });
             let text = `Your Password Recovery OTP is ${code}. Verify and recover your password.`;
-            await axios.post('/api/registerMail', { username, userEmail: email, text, subject: "Password Recovery OTP" })
+            await axios.post('/api/registerMail', { username, userEmail: email, text, subject: "Password Recovery OTP" });
         }
         return Promise.resolve(code);
     } catch (error) {
-        return Promise.reject({ error })
+        return Promise.reject({ error });
     }
 }
 
-/** verify OPT */
-
+/** verify OTP */
 export async function verifyOTP(username, code) {
     try {
         const { data, status } = await axios.get('/api/verifyOTP', { params: { username, code } });
         return { data, status };
     } catch (error) {
-        return Promise.reject({ error })
+        return Promise.reject({ error });
     }
 }
-
 
 /** reset password */
 export async function resetPassword({ username, password }) {
@@ -123,7 +116,6 @@ export async function resetPassword({ username, password }) {
         const { data, status } = await axios.put('/api/resetPassword', { username, password });
         return Promise.resolve({ data, status });
     } catch (error) {
-        return Promise.reject({ error })
+        return Promise.reject({ error });
     }
-
 }
