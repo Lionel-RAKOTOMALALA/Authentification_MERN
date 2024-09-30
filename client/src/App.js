@@ -4,31 +4,27 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 /** import all components */
 import PageNotFound from './components/PageNotFound';
-import Password from './components/Password';
 import Profile from './components/Profile';
 import Recovery from './components/Recovery';
 import Register from './components/Register';
 import Reset from './components/Reset';
-import Username from './components/Username';
+import AuthForm from './components/Login';
+import {AuthorizeUser, ProtectRoute} from './middleware/auth'
 
 //** Root Routes */
 
 const router = createBrowserRouter([
     {
         path : '/',
-        element : <Username></Username>
+        element : <AuthForm></AuthForm>
     },
     {
         path : '/register',
         element : <Register></Register>
     },
     {
-        path : '/password',
-        element : <Password></Password>
-    },
-    {
         path : '/profile',
-        element : <Profile></Profile>
+        element : <AuthorizeUser><Profile/></AuthorizeUser>
     },
     {
         path : '/recovery',

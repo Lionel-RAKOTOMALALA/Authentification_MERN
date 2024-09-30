@@ -61,16 +61,20 @@ export async function registerUser(credentials) {
 
 
 /** Login function */
+
 export async function verifyPassword({ username, password }) {
     try {
         if (username) {
             const { data } = await axios.post('/api/login', { username, password });
-            return Promise.resolve({ data });
+            return data;  // Retourner directement les données en cas de succès
         }
+        throw new Error("Le nom d'utilisateur est requis.");  // Gérer le cas où le nom d'utilisateur n'est pas fourni
     } catch (error) {
-        return Promise.reject({ error: "Password doesn't Match...!" });
+        // Rejeter la promesse avec un message convivial ou l'erreur d'origine
+        return Promise.reject(error.response?.data?.message || "Le mot de passe ne correspond pas...!"); 
     }
 }
+
 
 /** update user function */
 export async function updateUser(response) {

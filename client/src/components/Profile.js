@@ -10,11 +10,13 @@ import convertToBase64 from '../helper/convert';
 import useFetch from '../hooks/fetch.hook';
 import { useAuthStore } from '../store/store';
 import { updateUser } from '../helper/helper';
+import { useNavigate } from 'react-router-dom';
 
 // Déclaration du composant fonctionnel Profile
 export default function Profile() {
   const [file, setFile] = useState();
   const [{ isLoading, apiData, serverError }] = useFetch();
+  const navigate = useNavigate();
 
   // Log the API data for debugging
   useEffect(() => {
@@ -37,7 +39,10 @@ export default function Profile() {
 
     onSubmit: async (values) => {
       // Assigner l'avatar ou utiliser l'image existante
-      values = await Object.assign(values, { profile: file || '' });
+      values = {
+        ...values,
+        profile: file || apiData?.profile || '', // Utilise l'image actuelle si aucune nouvelle image n'est téléchargée
+      };
       let updatePromise = updateUser(values);
 
       toast.promise(updatePromise, {
@@ -50,11 +55,17 @@ export default function Profile() {
 
   // Gestion de l'upload de fichier
   const onUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return; // Assure-toi qu'un fichier est sélectionné
-    const base64 = await convertToBase64(file);
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return; // Assure-toi qu'un fichier est sélectionné
+    const base64 = await convertToBase64(selectedFile);
     setFile(base64);  // Stocke l'image convertie en base64 dans l'état local
   };
+
+  // logout handler function
+  function userLogout() {
+    localStorage.removeItem('token');
+    navigate('/');
+  }
 
   // Vérification : Si une nouvelle image est uploadée, elle doit être prioritaire à l'affichage
   const profileImage = file || apiData?.profile || avatar;
@@ -109,7 +120,7 @@ export default function Profile() {
                     id="mobile"
                     placeholder='Contact'
                     className={`${styles.textbox} ${extend.textbox}`}
-                    name="mobile"  // Changed from 'contact' to 'mobile'
+                    name="mobile"
                     {...formik.getFieldProps('mobile')}
                   />
                   <input
@@ -135,7 +146,7 @@ export default function Profile() {
               </div>
 
               <div className="text-center py-4">
-                <span className='text-gray-500'>Vous voulez vous déconnecter ? <Link className='text-red-500' to="/">Se deconnecter</Link></span>
+                <span className='text-gray-500'>Vous voulez vous déconnecter ? <button className='text-red-500' onClick={userLogout}>Se déconnecter</button></span>
               </div>
             </div>
           </form>

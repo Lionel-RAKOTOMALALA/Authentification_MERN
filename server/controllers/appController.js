@@ -62,23 +62,31 @@ export async function login(req, res) {
     const { username, password } = req.body;
 
     try {
+        // Vérification si l'username existe
         const user = await UserModel.findOne({ username });
         if (!user) {
             return res.status(404).send({ error: "Username not found" });
         }
 
+        // Username trouvé, on peut stocker l'username dans le client côté front si nécessaire
+        // Vérification du mot de passe
         const passwordCheck = await bcrypt.compare(password, user.password);
         if (!passwordCheck) {
-            return res.status(400).send({ error: "Password does not match" });
+            // Username correct mais mot de passe incorrect
+            return res.status(400).send({ 
+                error: "Password does not match", 
+                username: user.username // Retourne l'username pour le stocker
+            });
         }
 
-        // Create JWT token
+        // Username et mot de passe corrects, création du token JWT
         const token = jwt.sign({
             userId: user._id,
             username: user.username,
             email: user.email
         }, ENV.JWT_SECRET, { expiresIn: "24h" });
 
+        // Connexion réussie
         return res.status(200).send({
             msg: "Login Successful...!",
             username: user.username,
@@ -89,6 +97,8 @@ export async function login(req, res) {
         return res.status(500).send({ error: error.message });
     }
 }
+
+
 
 export async function getUser(req, res) {
     const { username } = req.params;
@@ -147,18 +157,9 @@ export async function updateUser(req, res) {
 }
 
 
-export async function generateOPT(req, res) {
-    try {
-        req.app.locals.OTP = otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
-
-        // Envoyer l'OTP par email
-        await registerMail(req, req.app.locals.OTP); // Passer l'OTP à la fonction d'envoi d'email
-        res.status(200).send({ msg: "Un email avec un OTP a été envoyé avec succès." });
-    } catch (error) {
-        console.error("Erreur lors de l'envoi de l'email avec l'OTP:", error);
-        // Réponse d'erreur ici
-        res.status(500).send({ error: "Erreur lors de l'envoi de l'email avec l'OTP" });
-    }
+export async function generateOTP(req,res){
+    req.app.locals.OTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false})
+    res.status(201).send({ code: req.app.locals.OTP })
 }
 export async function verifyOPT(req, res) {
     const { code } = req.query;

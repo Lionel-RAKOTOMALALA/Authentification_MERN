@@ -24,13 +24,11 @@ let mailGenerator = new Mailgen({
 })
 
 // Fonction pour envoyer l'email de confirmation
+// Fonction pour envoyer l'email de confirmation
 export const registerMail = async (req, otp = null) => {
-    const { username, text, subject } = req.body;
+    const { username, userEmail, text, subject } = req.body;
 
     try {
-        
-        const userEmail = req.user.email; // Assurez-vous que l'email est bien inclus dans le token JWT
-
         // Corps de l'email
         var email = {
             body: {
@@ -44,16 +42,16 @@ export const registerMail = async (req, otp = null) => {
 
         let message = {
             from: ENV.EMAIL, // Adresse email d'envoi (Gmail)
-            to: userEmail, // Adresse email de l'utilisateur connecté
+            to: userEmail, // Utilisez `userEmail` venant du front
             subject: subject || "OTP pour votre demande",
             html: emailBody
         }
 
         // Envoi de l'email
         await transporter.sendMail(message);
-        // Pas de réponse ici
+        console.log("Email envoyé avec succès !");
     } catch (error) {
         console.error("Erreur lors de l'envoi de l'email:", error);
-        throw new Error("Erreur lors de l'envoi de l'email"); // Lancez l'erreur pour la capturer dans generateOPT
+        throw new Error("Erreur lors de l'envoi de l'email");
     }
 }

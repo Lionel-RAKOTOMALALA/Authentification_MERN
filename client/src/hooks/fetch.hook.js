@@ -22,6 +22,8 @@ export default function useFetch(query) {
         const { username } = !query ? await getUsername() : '';
 
         console.log(username);
+        console.log("liooooo");
+        
         
         const { data, status } = !query ? await axios.get(`/api/user/${username}`) : await axios.get(`/api/${query}`);
 
