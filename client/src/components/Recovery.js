@@ -71,19 +71,20 @@ export default function Recovery() {
     e.preventDefault();
     console.log("Submitting OTP: ", OTP);
     try {
-      const { status } = await verifyOTP({ username, code: OTP });
-      console.log("Verification status: ", status);
-      if (status === 201) {
-        toast.success('Verified Successfully');
-        navigate('/reset');
-      } else {
-        toast.error('Wrong OTP! Check your email again!');
-      }
+        const { status } = await verifyOTP(username, OTP); // Assurez-vous que username est passé ici
+        console.log("Verification status: ", status);
+        if (status === 201) { // Vérifiez que le statut est 200 (OK)
+            toast.success('Verified Successfully');
+            navigate('/reset');
+        } else {
+            toast.error('Wrong OTP! Check your email again!');
+        }
     } catch (error) {
-      console.error("Verification error: ", error);
-      toast.error('Error while verifying OTP!');
+        console.error("Verification error: ", error);
+        toast.error('Error while verifying OTP!');
     }
-  }
+}
+
   
   // Fonction pour renvoyer l'OTP lors du clic sur "Resend"
   const resendOTP = async (e) => {
