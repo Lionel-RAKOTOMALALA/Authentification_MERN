@@ -34,7 +34,6 @@ export const registerMail = async (req, otp = null) => {
             body: {
                 name: username,
                 intro: text || "Bienvenue sur Mailgen ! Voici votre OTP :",
-                outro: `Votre OTP est : ${otp || "N/A"}`,
             }
         }
 
