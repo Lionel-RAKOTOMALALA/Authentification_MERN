@@ -170,8 +170,7 @@
 
     export async function createResetSession(req, res) {
         if (req.app.locals.resetSession) {
-            req.app.locals.resetSession = false; // allow access to this route only once
-            return res.status(201).send({ msg: 'access granted!' });
+            return res.status(201).send({ flag: req.app.locals.resetSession });
         }
         return res.status(440).send({ error: "Session expired!" });
     }
@@ -191,7 +190,7 @@
                 
                 const hashedPassword = await bcrypt.hash(password, 10);
                 
-                await UserModel.updateOne({ username: user.username }, { password: hashedPassword });
+                await UserModel.updateOne({ username: user.username }, { password: hashedPassword },);
                 
                 return res.status(200).send({ msg: "Password reset successfully!" });
                 

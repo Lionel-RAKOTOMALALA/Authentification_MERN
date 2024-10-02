@@ -1,35 +1,18 @@
 import mongoose from "mongoose";
+
 import { MongoMemoryServer } from "mongodb-memory-server";
+import ENV from '../config.js'
 
-async function connect() {
-    try {
-        // Création de l'instance MongoMemoryServer
-        const mongod = await MongoMemoryServer.create({
-            instance: {
-                port: 27017, // Optionnel: spécifie un port spécifique
-            },
-            binary: {
-                version: '4.4.0', // Optionnel: spécifie une version de MongoDB
-            },
-            timeout: 60000 // Augmentation du délai à 60 secondes
-        });
+async function connect(){
 
-        // Récupère l'URI pour se connecter à la base de données en mémoire
-        const getUri = mongod.getUri();
-        
-        // Connexion à la base de données MongoDB
-        const db = await mongoose.connect(getUri, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
+    const mongod = await MongoMemoryServer.create();
+    const getUri = mongod.getUri();
 
-        console.log("Database connected successfully");
-
-        return db;
-    } catch (error) {
-        console.error("Failed to connect to the database", error);
-        throw error;
-    }
+    mongoose.set('strictQuery', true)
+    // const db = await mongoose.connect(getUri);
+    const db = await mongoose.connect(ENV.ATLAS_URI);
+    console.log("Database Connected")
+    return db;
 }
 
 export default connect;

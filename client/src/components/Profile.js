@@ -18,6 +18,9 @@ export default function Profile() {
   const [{ isLoading, apiData, serverError }] = useFetch();
   const navigate = useNavigate();
 
+  // Récupération des fonctions de Zustand
+  const setActive = useAuthStore((state) => state.setActive);
+  const setUsername = useAuthStore((state) => state.setUsername);
   // Log the API data for debugging
   useEffect(() => {
     console.log("API Data:", apiData);
@@ -61,9 +64,17 @@ export default function Profile() {
     setFile(base64);  // Stocke l'image convertie en base64 dans l'état local
   };
 
+
   // logout handler function
   function userLogout() {
-    localStorage.removeItem('token');
+    // Vider tout le localStorage
+    localStorage.clear();
+    
+    // Réinitialiser l'état du store Zustand
+    setActive(false);    // Désactiver l'utilisateur
+    setUsername('');     // Réinitialiser le nom d'utilisateur
+    
+    // Redirection vers la page de connexion
     navigate('/');
   }
 
